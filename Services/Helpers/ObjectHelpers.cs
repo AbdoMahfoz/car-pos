@@ -70,7 +70,7 @@ namespace Services.Helpers
         public static IEnumerable<EnumResult> GetEnumOptions(string EnumName)
         {
             List<EnumResult> res = new List<EnumResult>();
-            Type t = (from type in Assembly.GetAssembly(typeof(BaseModel)).GetTypes()
+            Type t = (from type in Assembly.GetAssembly(typeof(BaseModel))?.GetTypes()
                 where type.IsEnum && type.Name == EnumName
                 select type).SingleOrDefault();
             if (t == null) return null;
