@@ -29,5 +29,6 @@ namespace Models.DataModels.ItemModels
         }
         
         public virtual ICollection<ItemPurchase> Purchases { get; set; }
+        public virtual ICollection<ItemPicture> Pictures { get; set; }
     }
 }

@@ -23,6 +23,7 @@ namespace Models
         public DbSet<ItemCategory> ItemCategories { get; set; }
         public DbSet<ItemRate> ItemRates { get; set; }
         public DbSet<ItemPurchase> ItemPurchases { get; set; }
+        public DbSet<ItemPicture> ItemPictures { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
