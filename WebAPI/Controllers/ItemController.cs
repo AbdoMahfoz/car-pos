@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using BusinessLogic.Initializers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Services.DTOs;
 
 namespace WebAPI.Controllers
 {
@@ -10,22 +13,41 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ItemController : ControllerBase
     {
+        private readonly IItemLogic logic;
+        public ItemController(IItemLogic logic)
+        {
+            this.logic = logic;
+        }
         /// <summary>
         ///     Returns all categories in the system
         /// </summary>
+        [ProducesResponseType(200, Type = typeof(IEnumerable<ItemCategoryResultDTO>))]
         [HttpGet("Categories")]
-        public IActionResult GetAllCategories()
+        public IActionResult GetAllCategories([FromQuery] int? RootCategoryId)
         {
-            throw new NotImplementedException();
+            return Ok(logic.GetRootCategories(RootCategoryId));
+        }
+
+        /// <summary>
+        ///     Returns all car models in the system
+        /// </summary>
+        [ProducesResponseType(200, Type = typeof(IEnumerable<CarModelResultDTO>))]
+        [HttpGet("CarModels")]
+        public IActionResult GetCarModels([FromQuery] DateTime? cacheTime)
+        {
+            return Ok(logic.GetCarModels(cacheTime));
         }
 
         /// <summary>
         ///     Returns all items that belong to a category
         /// </summary>
+        [ProducesResponseType(200, Type = typeof(IEnumerable<ItemResultDTO>))]
         [HttpGet]
-        public IActionResult GetItemsInCategory([FromQuery] int CategoryId)
+        public IActionResult GetItemsInCategory([FromQuery] int? CategoryId, [FromQuery] int? CarModelId)
         {
-            throw new NotImplementedException();
+            var res = logic.GetItemsIn(CategoryId, CarModelId);
+            if (res == null) return BadRequest();
+            return Ok(res);
         }
 
         /// <summary>
@@ -49,7 +71,7 @@ namespace WebAPI.Controllers
         }
     
         /// <summary>
-        ///     But an item
+        ///     Buy an item
         /// </summary>
         [HttpPost("Buy")]
         public IActionResult MakeAPurchase([FromQuery] int ItemId)

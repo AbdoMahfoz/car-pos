@@ -153,6 +153,8 @@ namespace WebAPI
             services.AddScoped<IPermissionsRepository, PermissionsRepository>();
             services.AddScoped<IRolesRepository, RolesRepository>();
 
+            services.AddScoped<IItemRepository, ItemRepository>();
+
             services.AddScoped<IAuthorizationHandler, LoginHandler>();
             services.AddScoped<IActionPermissionRepository, ActionPermissionRepository>();
             services.AddScoped<IActionRolesRepository, ActionRolesRepository>();

@@ -7,10 +7,14 @@ namespace Models.DataModels.ItemModels
     public class Item : BaseModel
     {
         public string Name { get; set; }
+        public double Price { get; set; }
+        public double Discount { get; set; }
+        
         public int CategoryId { get; set; }
         public virtual ItemCategory Category { get; set; }
-        public double Price { get; set; }
-        public int Discount { get; set; }
+        
+        public int CarModelId { get; set; }
+        public virtual ItemCarModel CarModel { get; set; }
 
         [NotMapped]
         public double TotalRating

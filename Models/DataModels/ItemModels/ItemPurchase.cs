@@ -1,6 +1,4 @@
-using Models.DataModels.ItemModels;
-
-namespace Models.DataModels
+namespace Models.DataModels.ItemModels
 {
     public class ItemPurchase : BaseModel
     {

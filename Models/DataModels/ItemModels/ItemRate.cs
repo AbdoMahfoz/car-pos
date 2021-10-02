@@ -1,4 +1,4 @@
-namespace Models.DataModels
+namespace Models.DataModels.ItemModels
 {
     public class ItemRate : BaseModel
     {

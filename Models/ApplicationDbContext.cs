@@ -20,6 +20,7 @@ namespace Models
         public DbSet<ActionPermission> ActionPermissions { get; set; }
         
         public DbSet<Item> Items { get; set; }
+        public DbSet<ItemCarModel> CarModels { get; set; }
         public DbSet<ItemCategory> ItemCategories { get; set; }
         public DbSet<ItemRate> ItemRates { get; set; }
         public DbSet<ItemPurchase> ItemPurchases { get; set; }
