@@ -155,6 +155,8 @@ namespace WebAPI
 
             services.AddScoped<IItemRepository, ItemRepository>();
 
+            services.AddScoped<IItemLogic, ItemLogic>();
+
             services.AddScoped<IAuthorizationHandler, LoginHandler>();
             services.AddScoped<IActionPermissionRepository, ActionPermissionRepository>();
             services.AddScoped<IActionRolesRepository, ActionRolesRepository>();

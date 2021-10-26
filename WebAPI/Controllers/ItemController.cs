@@ -1,9 +1,9 @@
-using System;
 using System.Collections.Generic;
 using BusinessLogic.Initializers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.DTOs;
+using Services.Extensions;
 
 namespace WebAPI.Controllers
 {
@@ -22,7 +22,7 @@ namespace WebAPI.Controllers
         ///     Returns all categories in the system
         /// </summary>
         [ProducesResponseType(200, Type = typeof(IEnumerable<ItemCategoryResultDTO>))]
-        [HttpGet("Categories")]
+        [HttpGet("categories")]
         public IActionResult GetAllCategories([FromQuery] int? RootCategoryId)
         {
             return Ok(logic.GetRootCategories(RootCategoryId));
@@ -32,10 +32,10 @@ namespace WebAPI.Controllers
         ///     Returns all car models in the system
         /// </summary>
         [ProducesResponseType(200, Type = typeof(IEnumerable<CarModelResultDTO>))]
-        [HttpGet("CarModels")]
-        public IActionResult GetCarModels([FromQuery] DateTime? cacheTime)
+        [HttpGet("models")]
+        public IActionResult GetCarModels()
         {
-            return Ok(logic.GetCarModels(cacheTime));
+            return Ok(logic.GetCarModels());
         }
 
         /// <summary>
@@ -49,34 +49,15 @@ namespace WebAPI.Controllers
             if (res == null) return BadRequest();
             return Ok(res);
         }
-
-        /// <summary>
-        ///     Returns the full details of an item
-        /// </summary>
-        [HttpGet("Detail")]
-        public IActionResult GetItemDetail([FromQuery] int ItemId)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        ///     Returns a picture for the item
-        /// </summary>
-        /// <param name="ItemId">The Id of the item</param>
-        /// <param name="PictureIdx">0: Icon, 1: Cover, 2-N: Extra pictures</param>
-        [HttpGet("Picture")]
-        public IActionResult GetItemPicture([FromQuery] int ItemId, [FromQuery] int PictureIdx)
-        {
-            throw new NotImplementedException();
-        }
     
         /// <summary>
         ///     Buy an item
         /// </summary>
-        [HttpPost("Buy")]
-        public IActionResult MakeAPurchase([FromQuery] int ItemId)
+        [HttpPost("buy")]
+        public IActionResult MakePurchase([FromBody] IEnumerable<ItemPurchaseRequest> cart)
         {
-            throw new NotImplementedException();
+            if (logic.MakeAPurchase(User.GetId(), cart)) return Ok();
+            return BadRequest();
         }
     }
 }

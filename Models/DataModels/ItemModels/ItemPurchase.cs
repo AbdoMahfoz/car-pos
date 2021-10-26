@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Models.DataModels.ItemModels
 {
     public class ItemPurchase : BaseModel
@@ -8,6 +10,8 @@ namespace Models.DataModels.ItemModels
         public virtual Item Item { get; set; }
         public double PriceAtPurchase { get; set; }
         public double DiscountAtPurchase { get; set; }
-        public virtual ItemRate Rate { get; set; }
+        public string Comment { get; set; }
+        public int Rate { get; set; }
+        public int PurchasedQuantity { get; set; }
     }
 }

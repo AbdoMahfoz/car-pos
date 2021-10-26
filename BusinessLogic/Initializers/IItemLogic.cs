@@ -9,9 +9,10 @@ namespace BusinessLogic.Initializers
     {
         IEnumerable<ItemCategory> GetRootCategories(int? rootId);
         IEnumerable<ItemResultDTO> GetItemsIn(int? categoryId, int? carModelId);
-        IEnumerable<CarModelResultDTO> GetCarModels(DateTime? cacheTime);
-        byte[] GetPictureOfCarModel(int carModelId);
-        ItemPictureResultDTO GetPicturesOfItem(int itemId, DateTime? cacheTime);
-        void MakeAPurchase(int UserId, IEnumerable<int> itemIds);
+        IEnumerable<CarModelResultDTO> GetCarModels();
+        byte[] GetCarModelIcon(int carModelId, DateTime? cacheTime);
+        byte[] GetItemIcon(int itemId, DateTime? cacheTime);
+        byte[] GetPictureOfItem(int itemId, int index, DateTime? cacheTime);
+        bool MakeAPurchase(int UserId, IEnumerable<ItemPurchaseRequest> itemIds);
     }
 }

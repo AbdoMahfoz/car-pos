@@ -9,6 +9,21 @@ namespace Models.DataModels.ItemModels
         public string Name { get; set; }
         public double Price { get; set; }
         public double Discount { get; set; }
+        public bool IsNew { get; set; }
+        public int GuaranteeYears { get; set; }
+        public int InitialQuantity { get; set; }
+
+        [NotMapped]
+        public int Quantity
+        {
+            get => InitialQuantity - Purchases.Sum(u => u.PurchasedQuantity);
+        }
+
+        [NotMapped]
+        public int ImageCount
+        {
+            get => Pictures.Count(u => !u.IsIcon);
+        }
         
         public int CategoryId { get; set; }
         public virtual ItemCategory Category { get; set; }
@@ -16,21 +31,6 @@ namespace Models.DataModels.ItemModels
         public int CarModelId { get; set; }
         public virtual ItemCarModel CarModel { get; set; }
 
-        [NotMapped]
-        public double TotalRating
-        {
-            get => Purchases.Where(u => u.Rate != null).Select(u => u.Rate.Rate).Average();
-        }
-        [NotMapped]
-        public int RateCount
-        {
-            get => Purchases.Count(u => u.Rate != null);
-        }
-        [NotMapped]
-        public int PurchaseCount
-        {
-            get => Purchases.Count;
-        }
         
         public virtual ICollection<ItemPurchase> Purchases { get; set; }
         public virtual ICollection<ItemPicture> Pictures { get; set; }

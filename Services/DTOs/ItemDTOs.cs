@@ -11,27 +11,27 @@ namespace Services.DTOs
 
     public class ItemResultDTO
     {
+        public int Id { get; set; } 
         public string Name { get; set; }
         public double Price { get; set; }
         public double Discount { get; set; }
         public string CategoryName { get; set; }
-        public string CarModelName { get; set; }
-        public double TotalRating { get; set; }
-        public int RateCount { get; set; }
-        public int PurchaseCount { get; set; }
-    }
-
-    public class ItemPictureResultDTO
-    {
-        public string b64Cover { get; set; }
-        public string b64Icon { get; set; }
-        public string b64Pictures { get; set; }
+        public int CarModelId { get; set; }
+        public bool IsNew { get; set; }
+        public int GuaranteeYears { get; set; }
+        public int Quantity { get; set; }
+        public int ImageCount { get; set; }
     }
 
     public class CarModelResultDTO
     {
         public int Id { get; set; }
         public int Name { get; set; }
-        public bool ShouldUpdatePictureCache { get; set; }
+    }
+
+    public class ItemPurchaseRequest
+    {
+        public int ItemId { get; set; }
+        public int Quantity { get; set; }
     }
 }
