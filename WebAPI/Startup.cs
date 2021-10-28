@@ -154,6 +154,8 @@ namespace WebAPI
             services.AddScoped<IRolesRepository, RolesRepository>();
 
             services.AddScoped<IItemRepository, ItemRepository>();
+            services.AddScoped<IItemCategoryRepository, ItemCategoryRepository>();
+            services.AddScoped<IItemPictureRepository, ItemPictureRepository>();
 
             services.AddScoped<IItemLogic, ItemLogic>();
 

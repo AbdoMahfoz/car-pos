@@ -1,46 +1,150 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using BusinessLogic.Initializers;
+using Models.DataModels;
 using Models.DataModels.ItemModels;
+using Repository;
+using Repository.ExtendedRepositories;
 using Services.DTOs;
+using Services.Helpers;
 
 namespace BusinessLogic.Implementations
 {
     public class ItemLogic : IItemLogic
     {
-        public IEnumerable<ItemCategory> GetRootCategories(int? rootId)
+        private readonly IItemCategoryRepository ItemCategoryRepository;
+        private readonly IItemRepository ItemRepository;
+        private readonly IRepository<ItemCarModel> CarModelRepository;
+        private readonly IRepository<ItemCarModelIcon> CarModelIconRepository;
+        private readonly IItemPictureRepository ItemPictureRepository;
+        private readonly IRepository<Receit> ReceitRepository;
+        private static object PurchaseLock = new object();
+
+        public ItemLogic(IItemCategoryRepository itemCategoryRepository, IItemRepository itemRepository,
+            IRepository<ItemCarModel> carModelRepository, IRepository<ItemCarModelIcon> carModelIconRepository,
+            IItemPictureRepository itemPictureRepository, IRepository<Receit> receitRepository)
         {
-            throw new NotImplementedException();
+            this.ItemCategoryRepository = itemCategoryRepository;
+            this.ItemRepository = itemRepository;
+            this.CarModelRepository = carModelRepository;
+            this.CarModelIconRepository = carModelIconRepository;
+            this.ItemPictureRepository = itemPictureRepository;
+            this.ReceitRepository = receitRepository;
+        }
+
+        private static ItemCategoryResultDTO getRootCategoriesHelper(ItemCategory cur)
+        {
+            var res = ObjectHelpers.MapTo<ItemCategoryResultDTO>(cur);
+            res.Children = cur.ChildrenCategories.ToArray().Select(getRootCategoriesHelper);
+            return res;
+        }
+
+        private static ItemResultDTO itemHelper(Item item)
+        {
+            var res = ObjectHelpers.MapTo<ItemResultDTO>(item);
+            res.CategoryName = item.Category.Name;
+            return res;
+        }
+
+        public IEnumerable<ItemCategoryResultDTO> GetRootCategories()
+        {
+            return ItemCategoryRepository.GetRootCategories().ToArray().Select(getRootCategoriesHelper);
         }
 
         public IEnumerable<ItemResultDTO> GetItemsIn(int? categoryId, int? carModelId)
         {
-            throw new NotImplementedException();
+            return ItemRepository.GetItemsInCategoryAndModel(categoryId, carModelId).AsEnumerable().Select(itemHelper);
         }
 
         public IEnumerable<CarModelResultDTO> GetCarModels()
         {
-            throw new NotImplementedException();
+            return CarModelRepository.GetAll().Select(u => ObjectHelpers.MapTo<CarModelResultDTO>(u));
+        }
+
+        private static byte[] binaryHelper<T>(IQueryable<T> baseQuery, Expression<Func<T, byte[]>> dataSelector,
+            DateTime? cacheTime) where T : BaseModel
+        {
+            if (!baseQuery.Any())
+            {
+                throw new KeyNotFoundException();
+            }
+            try
+            {
+                var modifiedDate = baseQuery.Select(u => u.ModifiedDate).Single();
+                return (cacheTime == null || modifiedDate > cacheTime) ? baseQuery.Select(dataSelector).Single() : null;
+            }
+            catch (Exception)
+            {
+                throw new IndexOutOfRangeException();
+            }
         }
 
         public byte[] GetCarModelIcon(int carModelId, DateTime? cacheTime)
         {
-            throw new NotImplementedException();
+            return binaryHelper(
+                CarModelIconRepository.GetAll().Where(u => u.CarModelId == carModelId),
+                u => u.data,
+                cacheTime);
         }
 
         public byte[] GetItemIcon(int itemId, DateTime? cacheTime)
         {
-            throw new NotImplementedException();
+            return binaryHelper(
+                ItemPictureRepository.GetIconOfItem(itemId),
+                u => u.Picture,
+                cacheTime);
         }
 
         public byte[] GetPictureOfItem(int itemId, int index, DateTime? cacheTime)
         {
-            throw new NotImplementedException();
+            return binaryHelper(
+                ItemPictureRepository.GetPictureOfItem(itemId, index),
+                u => u.Picture,
+                cacheTime);
         }
 
-        public bool MakeAPurchase(int UserId, IEnumerable<ItemPurchaseRequest> itemIds)
+        public bool MakeAPurchase(int UserId, IEnumerable<ItemPurchaseRequest> items)
         {
-            throw new NotImplementedException();
+            lock (PurchaseLock)
+            {
+                try
+                {
+                    var receit = new Receit
+                    {
+                        UserId = UserId,
+                        Items = items.Select(u =>
+                        {
+                            var sourceItem = ItemRepository.Get(u.ItemId);
+                            if (sourceItem == null)
+                            {
+                                throw new ArgumentException();
+                            }
+
+                            if (sourceItem.Quantity < u.Quantity)
+                            {
+                                throw new ArgumentOutOfRangeException();
+                            }
+
+                            return new ReceitItem
+                            {
+                                ItemId = u.ItemId,
+                                PriceAtPurchase = sourceItem.Price,
+                                DiscountAtPurchase = sourceItem.Discount,
+                                PurchasedQuantity = u.Quantity
+                            };
+                        }).ToList()
+                    };
+                    ReceitRepository.Insert(receit).Wait();
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

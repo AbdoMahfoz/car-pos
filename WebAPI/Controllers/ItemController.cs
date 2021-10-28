@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BusinessLogic.Initializers;
 using Microsoft.AspNetCore.Authorization;
@@ -14,18 +15,20 @@ namespace WebAPI.Controllers
     public class ItemController : ControllerBase
     {
         private readonly IItemLogic logic;
+
         public ItemController(IItemLogic logic)
         {
             this.logic = logic;
         }
+
         /// <summary>
         ///     Returns all categories in the system
         /// </summary>
         [ProducesResponseType(200, Type = typeof(IEnumerable<ItemCategoryResultDTO>))]
         [HttpGet("categories")]
-        public IActionResult GetAllCategories([FromQuery] int? RootCategoryId)
+        public IActionResult GetAllCategories()
         {
-            return Ok(logic.GetRootCategories(RootCategoryId));
+            return Ok(logic.GetRootCategories());
         }
 
         /// <summary>
@@ -49,15 +52,22 @@ namespace WebAPI.Controllers
             if (res == null) return BadRequest();
             return Ok(res);
         }
-    
+
         /// <summary>
         ///     Buy an item
         /// </summary>
         [HttpPost("buy")]
         public IActionResult MakePurchase([FromBody] IEnumerable<ItemPurchaseRequest> cart)
         {
-            if (logic.MakeAPurchase(User.GetId(), cart)) return Ok();
-            return BadRequest();
+            try
+            {
+                if (logic.MakeAPurchase(User.GetId(), cart)) return Ok();
+                return Accepted();
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
         }
     }
 }

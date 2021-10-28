@@ -24,7 +24,8 @@ namespace Models
         public DbSet<ItemCarModelIcon> CarModelIcons { get; set; }
         public DbSet<ItemCategory> ItemCategories { get; set; }
         public DbSet<ItemPicture> ItemPictures { get; set; }
-        public DbSet<ItemPurchase> ItemPurchases { get; set; }
+        public DbSet<Receit> Receits { get; set; }
+        public DbSet<ReceitItem> ReceitItems { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {

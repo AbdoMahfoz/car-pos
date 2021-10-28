@@ -32,7 +32,7 @@ namespace Models.DataModels.ItemModels
         public virtual ItemCarModel CarModel { get; set; }
 
         
-        public virtual ICollection<ItemPurchase> Purchases { get; set; }
+        public virtual ICollection<ReceitItem> Purchases { get; set; }
         public virtual ICollection<ItemPicture> Pictures { get; set; }
     }
 }

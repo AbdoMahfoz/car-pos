@@ -7,7 +7,7 @@ namespace BusinessLogic.Initializers
 {
     public interface IItemLogic
     {
-        IEnumerable<ItemCategory> GetRootCategories(int? rootId);
+        IEnumerable<ItemCategoryResultDTO> GetRootCategories();
         IEnumerable<ItemResultDTO> GetItemsIn(int? categoryId, int? carModelId);
         IEnumerable<CarModelResultDTO> GetCarModels();
         byte[] GetCarModelIcon(int carModelId, DateTime? cacheTime);
