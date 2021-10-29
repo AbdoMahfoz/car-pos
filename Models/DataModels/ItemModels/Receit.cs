@@ -8,18 +8,8 @@ namespace Models.DataModels.ItemModels
     {
         public int UserId { get; set; }
         public virtual User User { get; set; }
-
-        [NotMapped]
-        public double TotalPrice
-        {
-            get => Items.Sum(u => (u.PriceAtPurchase * (1 - u.DiscountAtPurchase)) * u.PurchasedQuantity);
-        }
-
-        [NotMapped]
-        public int ItemCount
-        {
-            get => Items.Count;
-        }
+        public double TotalPrice { get; set; }
+        public int ItemCount { get; set; }
 
         public virtual ICollection<ReceitItem> Items { get; set; }
     }

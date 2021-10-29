@@ -70,6 +70,7 @@ namespace BusinessLogic.Implementations
             {
                 throw new KeyNotFoundException();
             }
+
             try
             {
                 var modifiedDate = baseQuery.Select(u => u.ModifiedDate).Single();
@@ -109,39 +110,45 @@ namespace BusinessLogic.Implementations
         {
             lock (PurchaseLock)
             {
-                try
+                var requestedItems = items.ToArray();
+                var requestedItemsMap = requestedItems.ToDictionary(u => u.ItemId, u => u);
+                var requestedItemIds = requestedItems.Select(u => u.ItemId);
+                var sourceItems = ItemRepository.GetAll().Where(u => requestedItemIds.Contains(u.Id))
+                    .ToDictionary(u => u.Id, u => u);
+                if (sourceItems.Count != requestedItems.Length)
                 {
-                    var receit = new Receit
+                    throw new ArgumentException(null, nameof(items));
+                }
+
+                foreach (var (id, sourceItem) in sourceItems)
+                {
+                    var requestedItem = requestedItemsMap[id];
+                    if (requestedItem.Quantity > sourceItem.Quantity)
                     {
-                        UserId = UserId,
-                        Items = items.Select(u =>
-                        {
-                            var sourceItem = ItemRepository.Get(u.ItemId);
-                            if (sourceItem == null)
-                            {
-                                throw new ArgumentException();
-                            }
-
-                            if (sourceItem.Quantity < u.Quantity)
-                            {
-                                throw new ArgumentOutOfRangeException();
-                            }
-
-                            return new ReceitItem
-                            {
-                                ItemId = u.ItemId,
-                                PriceAtPurchase = sourceItem.Price,
-                                DiscountAtPurchase = sourceItem.Discount,
-                                PurchasedQuantity = u.Quantity
-                            };
-                        }).ToList()
-                    };
-                    ReceitRepository.Insert(receit).Wait();
+                        return false;
+                    }
                 }
-                catch (ArgumentOutOfRangeException)
+
+                var receit = new Receit
                 {
-                    return false;
-                }
+                    UserId = UserId,
+                    TotalPrice = sourceItems.Values.Sum(u => (u.Price * (1 - u.Discount)) * u.Quantity),
+                    ItemCount = requestedItems.Length,
+                    Items = requestedItems.Select(u =>
+                    {
+                        var sourceItem = sourceItems[u.ItemId];
+                        sourceItem.Quantity -= u.Quantity;
+                        ItemRepository.Update(sourceItem);
+                        return new ReceitItem
+                        {
+                            ItemId = u.ItemId,
+                            PriceAtPurchase = sourceItem.Price,
+                            DiscountAtPurchase = sourceItem.Discount,
+                            PurchasedQuantity = u.Quantity
+                        };
+                    }).ToList()
+                };
+                ReceitRepository.Insert(receit).Wait();
             }
 
             return true;

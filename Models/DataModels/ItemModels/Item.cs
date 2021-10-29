@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
@@ -6,18 +7,13 @@ namespace Models.DataModels.ItemModels
 {
     public class Item : BaseModel
     {
+        [Required]
         public string Name { get; set; }
         public double Price { get; set; }
         public double Discount { get; set; }
         public bool IsNew { get; set; }
         public int GuaranteeYears { get; set; }
-        public int InitialQuantity { get; set; }
-
-        [NotMapped]
-        public int Quantity
-        {
-            get => InitialQuantity - Purchases.Sum(u => u.PurchasedQuantity);
-        }
+        public int Quantity { get; set; }
 
         [NotMapped]
         public int ImageCount

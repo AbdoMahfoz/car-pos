@@ -9,6 +9,8 @@
         public int TokenExpirationMinutes { get; set; }
         public string LocalDatabaseName { get; set; }
         public bool ValidateRolesFromToken { get; set; }
+        public bool UseSQLServer { get; set; }
+        public string ConnectionString { get; set; }
 
         public class SiteDataObject
         {
