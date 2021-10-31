@@ -19,8 +19,7 @@ namespace BusinessLogic.Initializers
                 ((BaseInitializer)ActivatorUtilities.CreateInstance(provider, type)).Initialize();
             }
         }
-        protected virtual void Initialize()
-        {
-        }
+
+        protected abstract void Initialize();
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using BusinessLogic.Initializers;
+using BusinessLogic.Interfaces;
 using Models.DataModels;
 using Models.DataModels.ItemModels;
 using Repository;
@@ -20,11 +21,12 @@ namespace BusinessLogic.Implementations
         private readonly IRepository<ItemCarModelIcon> CarModelIconRepository;
         private readonly IItemPictureRepository ItemPictureRepository;
         private readonly IRepository<Receit> ReceitRepository;
-        private static object PurchaseLock = new object();
+        private readonly ISearch Search;
+        private static readonly object PurchaseLock = new object();
 
         public ItemLogic(IItemCategoryRepository itemCategoryRepository, IItemRepository itemRepository,
             IRepository<ItemCarModel> carModelRepository, IRepository<ItemCarModelIcon> carModelIconRepository,
-            IItemPictureRepository itemPictureRepository, IRepository<Receit> receitRepository)
+            IItemPictureRepository itemPictureRepository, IRepository<Receit> receitRepository, ISearch search)
         {
             this.ItemCategoryRepository = itemCategoryRepository;
             this.ItemRepository = itemRepository;
@@ -32,6 +34,7 @@ namespace BusinessLogic.Implementations
             this.CarModelIconRepository = carModelIconRepository;
             this.ItemPictureRepository = itemPictureRepository;
             this.ReceitRepository = receitRepository;
+            this.Search = search;
         }
 
         private static ItemCategoryResultDTO getRootCategoriesHelper(ItemCategory cur)
@@ -53,9 +56,16 @@ namespace BusinessLogic.Implementations
             return ItemCategoryRepository.GetRootCategories().ToArray().Select(getRootCategoriesHelper);
         }
 
-        public IEnumerable<ItemResultDTO> GetItemsIn(int? categoryId, int? carModelId)
+        public IEnumerable<ItemResultDTO> GetItemsIn(string query, int? categoryId, int? carModelId)
         {
-            return ItemRepository.GetItemsInCategoryAndModel(categoryId, carModelId).AsEnumerable().Select(itemHelper);
+            var res = ItemRepository.GetItemsInCategoryAndModel(categoryId, carModelId);
+            if (query != null)
+            {
+                var itemIds = Search.Query(query);
+                res = res.Where(u => itemIds.Contains(u.Id));
+            }
+
+            return res.AsEnumerable().Select(itemHelper);
         }
 
         public IEnumerable<CarModelResultDTO> GetCarModels()

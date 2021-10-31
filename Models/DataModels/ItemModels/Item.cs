@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using Models.DataModels.SearchModels;
 
 namespace Models.DataModels.ItemModels
 {
@@ -30,5 +31,6 @@ namespace Models.DataModels.ItemModels
         
         public virtual ICollection<ReceitItem> Purchases { get; set; }
         public virtual ICollection<ItemPicture> Pictures { get; set; }
+        public virtual ICollection<IndexItems> Indices { get; set; }
     }
 }

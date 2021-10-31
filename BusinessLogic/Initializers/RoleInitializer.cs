@@ -1,7 +1,6 @@
 ﻿using Repository.ExtendedRepositories;
 using System.Linq;
 using Models.DataModels;
-using System.Threading.Tasks;
 
 namespace BusinessLogic.Initializers
 {

@@ -3,8 +3,10 @@ using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Models.DataModels;
 using Models.DataModels.ItemModels;
+using Models.DataModels.SearchModels;
 using Models.Helpers;
 using Newtonsoft.Json;
+using Index = Models.DataModels.SearchModels.Index;
 
 namespace Models
 {
@@ -26,6 +28,8 @@ namespace Models
         public DbSet<ItemPicture> ItemPictures { get; set; }
         public DbSet<Receit> Receits { get; set; }
         public DbSet<ReceitItem> ReceitItems { get; set; }
+        public DbSet<Index> Indices { get; set; }
+        public DbSet<IndexItems> IndexItems { get; set; }
 
 
         public ApplicationDbContext()

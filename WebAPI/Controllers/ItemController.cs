@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BusinessLogic.Initializers;
+using BusinessLogic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.DTOs;
@@ -46,9 +47,10 @@ namespace WebAPI.Controllers
         /// </summary>
         [ProducesResponseType(200, Type = typeof(IEnumerable<ItemResultDTO>))]
         [HttpGet]
-        public IActionResult GetItemsInCategory([FromQuery] int? CategoryId, [FromQuery] int? CarModelId)
+        public IActionResult GetItemsInCategory([FromQuery] int? CategoryId, [FromQuery] int? CarModelId,
+            [FromQuery] string Query = null)
         {
-            var res = logic.GetItemsIn(CategoryId, CarModelId);
+            var res = logic.GetItemsIn(Query, CategoryId, CarModelId);
             if (res == null) return BadRequest();
             return Ok(res);
         }

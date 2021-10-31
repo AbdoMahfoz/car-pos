@@ -1,0 +1,20 @@
+version: "3.8"
+services: 
+    web:
+        container_name: pos-server
+        build: .
+        ports: 
+            - '5001:5001'
+        depends_on: 
+            - db
+    db:
+        container_name: pos-db
+        image: mcr.microsoft.com/mssql/server:2019-CU13-ubuntu-20.04
+        user: mssql
+        volumes:
+            - '~/db/pos/data:/var/opt/mssql/data'
+            - '~/db/pos/log:/var/opt/mssql/log'
+            - '~/db/pos/secrets:/var/opt/mssql/secrets'
+        environment: 
+            ACCEPT_EULA: Y
+            SA_PASSWORD: Dev12345678

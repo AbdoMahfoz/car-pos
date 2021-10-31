@@ -123,7 +123,7 @@ namespace Repository
                 throw new ArgumentNullException(nameof(Entities), "The Deleted Entites are Null");
             this.Entities.RemoveRange(Entities);
             SaveChanges();
-            Logger.LogInformation($"{Entities.GetType()} are removed from Database");
+            Logger.LogInformation($"{typeof(T)} are removed from Database");
         }
 
         public void SaveChanges()
