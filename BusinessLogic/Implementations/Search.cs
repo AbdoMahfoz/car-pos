@@ -86,7 +86,13 @@ namespace BusinessLogic.Implementations
                     }
                 }
 
-                IndexRepository.HardDeleteRange(IndexRepository.GetAll());
+                if (res.Count == 0) return;
+                var currentIndex = IndexRepository.GetAll();
+                if (currentIndex.Any())
+                {
+                    IndexRepository.HardDeleteRange(IndexRepository.GetAll());
+                }
+
                 tokensWithItemIds = null;
                 IndexRepository.InsertRange(res.Select(u => new Index
                 {

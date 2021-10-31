@@ -3,7 +3,7 @@ using Models.DataModels.ItemModels;
 
 namespace Models.DataModels.SearchModels
 {
-    public class IndexItems
+    public class IndexItems : BaseModel
     {
         public int IndexId { get; set; }
         public virtual Index Index { get; set; }
