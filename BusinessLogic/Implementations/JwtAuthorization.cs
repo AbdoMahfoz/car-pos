@@ -22,8 +22,9 @@ namespace BusinessLogic.Implementations
         private readonly IRolesRepository RolesRepository;
         private readonly IPermissionsRepository PermissionsRepository;
         private readonly IPasswordManager PasswordManager;
-        public JwtAuthorization(IOptions<AppSettings> options, 
-            IUserRepository UserRepository, IPasswordManager PasswordManager, 
+
+        public JwtAuthorization(IOptions<AppSettings> options,
+            IUserRepository UserRepository, IPasswordManager PasswordManager,
             IRolesRepository RolesRepository, IPermissionsRepository PermissionsRepository)
         {
             this.options = options;
@@ -32,6 +33,7 @@ namespace BusinessLogic.Implementations
             this.RolesRepository = RolesRepository;
             this.PermissionsRepository = PermissionsRepository;
         }
+
         public User GenerateToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -42,50 +44,62 @@ namespace BusinessLogic.Implementations
                 new Claim("Id", user.Id.ToString()),
                 new Claim("DateIssued", DateTime.UtcNow.ToString())
             };
-            if(options.Value.ValidateRolesFromToken)
+            if (options.Value.ValidateRolesFromToken)
             {
                 List<Claim> RoleClaims = null, PermissionClaims = null;
                 Task.WaitAll(
                     Task.Run(() =>
                     {
                         RoleClaims = new List<Claim>(from role in RolesRepository.GetRolesOfUser(user.Id)
-                                                     select new Claim(ClaimTypes.Role, role.Name));
+                            select new Claim(ClaimTypes.Role, role.Name));
                     }),
-                    Task.Run(() => 
+                    Task.Run(() =>
                     {
-                        PermissionClaims = new List<Claim>(from permission in PermissionsRepository.GetPermissionsOfUser(user.Id)
-                                                           select new Claim("Permission", permission.Name));
+                        PermissionClaims = new List<Claim>(
+                            from permission in PermissionsRepository.GetPermissionsOfUser(user.Id)
+                            select new Claim("Permission", permission.Name));
                     })
                 );
                 Claims.AddRange(RoleClaims);
                 Claims.AddRange(PermissionClaims);
             }
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(Claims),
                 Expires = DateTime.UtcNow.AddMinutes(options.Value.TokenExpirationMinutes),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             user.Token = tokenHandler.WriteToken(token);
             user.Password = null;
             return user;
         }
+
         public User GenerateToken(int UserId)
         {
             return GenerateToken(UserRepository.Get(UserId));
         }
+
         public User Authenticate(UserAuthenticationRequest request)
         {
+            if (request.Admin && !RolesRepository.UserHasRole(request.Username, "Admin"))
+            {
+                return null;
+            }
+
             User user = UserRepository.GetUser(request.Username);
             if (user == null || !PasswordManager.ComparePassword(request.Password, user.Password)) return null;
-            if(!user.LoggedIn)
+            if (!user.LoggedIn)
             {
                 user.LoggedIn = true;
                 UserRepository.Update(user);
             }
+
             return GenerateToken(user);
         }
+
         public void Logout(int UserId)
         {
             User user = UserRepository.Get(UserId);
@@ -93,13 +107,15 @@ namespace BusinessLogic.Implementations
             user.LastLogOut = DateTime.UtcNow;
             UserRepository.Update(user);
         }
+
         public bool Validate(int UserId, DateTime TokenIssuedDate)
         {
             User user = UserRepository.Get(UserId);
-            if(user.LoggedIn && (user.LastLogOut == null || TokenIssuedDate > user.LastLogOut))
+            if (user.LoggedIn && (user.LastLogOut == null || TokenIssuedDate > user.LastLogOut))
             {
                 return true;
             }
+
             return false;
         }
     }

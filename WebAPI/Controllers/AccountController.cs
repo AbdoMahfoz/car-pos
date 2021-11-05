@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using BusinessLogic.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Models.DataModels;
@@ -21,12 +19,14 @@ namespace WebAPI.Controllers
         private readonly IAuth Auth;
         private readonly IAccountLogic AccountLogic;
         private readonly IOptions<AppSettings> options;
+
         public AccountController(IOptions<AppSettings> options, IAuth Auth, IAccountLogic AccountLogic)
         {
             this.Auth = Auth;
             this.options = options;
             this.AccountLogic = AccountLogic;
         }
+
         /// <summary>
         /// The only official way to get an access token for this API
         /// </summary>
@@ -40,25 +40,31 @@ namespace WebAPI.Controllers
         [ProducesResponseType(202, Type = typeof(UserAuthenticationResult))]
         [ProducesResponseType(404, Type = null)]
         [HttpPost("Token")]
-        public IActionResult Login([FromBody]UserAuthenticationRequest request)
+        public IActionResult Login([FromBody] UserAuthenticationRequest request)
         {
             try
             {
                 User user = Auth.Authenticate(request);
                 if (user == null)
                     return NotFound();
-                return StatusCode(StatusCodes.Status202Accepted, new UserAuthenticationResult(user.Id, user.Token, options.Value.TokenExpirationMinutes));
+                return Accepted(
+                    new UserAuthenticationResult(
+                        user.Id,
+                        user.Token,
+                        options.Value.TokenExpirationMinutes));
             }
-            catch(KeyNotFoundException)
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
         }
+
         /// <summary>
         /// Creates a new token with the same credientials of the exisiting one
         /// </summary>
         /// <remarks>
-        /// Use this to bypass the expiration date of the token without requiring the user to re-enter their passwords or dangerously save the username and password locally
+        /// Use this to bypass the expiration date of the token without requiring the user to re-enter
+        /// their passwords or dangerously save the username and password locally
         /// </remarks>
         /// <response code="200">New token</response>
         [Authorize]
@@ -69,6 +75,7 @@ namespace WebAPI.Controllers
             User user = Auth.GenerateToken(User.GetId());
             return Ok(new UserAuthenticationResult(user.Id, user.Token, options.Value.TokenExpirationMinutes));
         }
+
         /// <summary>
         /// Registers the user into the database
         /// </summary>
@@ -78,12 +85,11 @@ namespace WebAPI.Controllers
         [ProducesResponseType(200, Type = null)]
         [ProducesResponseType(409, Type = null)]
         [HttpPost("Register")]
-        public IActionResult Register([FromBody]UserAuthenticationRequest request)
+        public IActionResult Register([FromBody] UserAuthenticationRequest request)
         {
-            if (AccountLogic.Register(request, "User"))
-                return Ok();
-            return StatusCode(StatusCodes.Status409Conflict);
+            return AccountLogic.Register(request, "User") ? Ok() : Conflict();
         }
+
         /// <summary>
         /// Logs-out user from all devices
         /// </summary>
